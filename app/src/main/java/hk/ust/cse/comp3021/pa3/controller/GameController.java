@@ -177,6 +177,56 @@ public class GameController {
      */
     @Nullable
     public Player[] getWinners() {
-        throw new NotImplementedException();
+        ArrayList<Player> winners = new ArrayList<>();
+        Player[] players = getPlayers();
+        GameState[] gameStates = new GameState[players.length];
+
+        // winning condition
+        if (getGameBoard().getNumGems() == 0){
+            int maxScore = -999;
+
+            for (int i=0; i< players.length; i++){
+                gameStates[i] = getGameState(players[i].getId());
+                if (gameStates[i].hasLost()) {
+                    continue;
+                }
+                else {
+                    if (gameStates[i].getScore() > maxScore) {
+                        maxScore = gameStates[i].getScore();
+                    }
+                }
+            }
+
+            for (int i = 0; i < players.length; i++) {
+                if (gameStates[i].getScore() == maxScore) {
+                    winners.add(players[i]);
+                }
+            }
+
+            Player[] winningPlayers = new Player[winners.size()];
+            return winners.toArray(winningPlayers);
+        }
+        // the game has not finished yet: still gems left
+        else{
+            // check whether all players are dead
+            boolean allDead = true;
+
+            for (int i=0; i< players.length; i++){
+                gameStates[i] = getGameState(players[i].getId());
+                if (gameStates[i].hasLost()) {
+                    continue;
+                }
+                else {
+                    allDead = false;
+                    break;
+                }
+            }
+            if (allDead){
+                Player[] winningPlayers = new Player[winners.size()];
+                return winners.toArray(winningPlayers);
+            }
+            // the game still continues
+            else return null;
+        }
     }
 }

@@ -37,7 +37,9 @@ public class GameBoardController {
      * @param playerId The id of the player to kick out.
      */
     public void kickOut(int playerId) {
-
+        Position original = gameBoard.getPlayer(playerId).getOwner().getPosition();
+        //MoveResult result = new MoveResult.Valid.KickedOut(original); ???
+        gameBoard.getEntityCell(original).setEntity(null);
     }
 
     /**

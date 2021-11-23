@@ -69,6 +69,23 @@ public class Robot implements MoveDelegate {
      */
     @Override
     public void startDelegation(@NotNull MoveProcessor processor) {
+        stopDelegation();
+        //ExecutorService executor =
+        new Thread( ()->{
+            // Wait for some time (obtained from TimeIntervalGenerator.next()
+            try {
+                Thread.sleep(TimeIntervalGenerator.everySecond().next()); //????
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            // Make a move
+            if (strategy == Strategy.Random){
+                makeMoveRandomly(processor);
+            }
+            else if (strategy == Strategy.Smart){
+                makeMoveSmartly(processor);
+            }
+        });
 
     }
 
@@ -78,7 +95,7 @@ public class Robot implements MoveDelegate {
      */
     @Override
     public void stopDelegation() {
-
+        Thread.currentThread().interrupt();
     }
 
     private MoveResult tryMove(Direction direction) {
