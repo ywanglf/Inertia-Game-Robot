@@ -1,7 +1,6 @@
 package hk.ust.cse.comp3021.pa3.controller;
 
 import hk.ust.cse.comp3021.pa3.model.*;
-import hk.ust.cse.comp3021.pa3.util.NotImplementedException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -183,7 +182,7 @@ public class GameController {
 
         // winning condition
         if (getGameBoard().getNumGems() == 0){
-            int maxScore = -999;
+            int maxScore = Integer.MIN_VALUE;
 
             for (int i=0; i< players.length; i++){
                 gameStates[i] = getGameState(players[i].getId());

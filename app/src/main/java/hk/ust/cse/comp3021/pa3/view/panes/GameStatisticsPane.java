@@ -2,6 +2,7 @@ package hk.ust.cse.comp3021.pa3.view.panes;
 
 import hk.ust.cse.comp3021.pa3.model.GameState;
 import hk.ust.cse.comp3021.pa3.view.GameUIComponent;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.layout.ColumnConstraints;
@@ -59,15 +60,34 @@ public class GameStatisticsPane extends GridPane implements GameUIComponent {
      * Updates the statistics display with latest {@link GameState}.
      */
     public void updateStatistics() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                setNumMoves(gameState.getNumMoves());
+                setNumUndoes(gameState.getMoveStack().getPopCount());
+                setNumDeaths(gameState.getNumDeaths());
+                setNumLives(gameState.getNumLives(), gameState.hasUnlimitedLives());
+                setScore(gameState.getScore());
+            }
+        });
+        /*
         setNumMoves(gameState.getNumMoves());
         setNumUndoes(gameState.getMoveStack().getPopCount());
         setNumDeaths(gameState.getNumDeaths());
         setNumLives(gameState.getNumLives(), gameState.hasUnlimitedLives());
         setScore(gameState.getScore());
+
+         */
     }
 
     private void setNumMoves(int value) {
-        this.numMovesLabel.setText(String.format("Move: %d", value));
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                numMovesLabel.setText(String.format("Move: %d", value));
+            }
+        });
+        //this.numMovesLabel.setText(String.format("Move: %d", value));
     }
 
     private void setNumUndoes(int value) {

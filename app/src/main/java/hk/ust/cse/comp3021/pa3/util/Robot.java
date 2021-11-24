@@ -35,6 +35,8 @@ public class Robot implements MoveDelegate {
      */
     private final Strategy strategy;
 
+    private final AtomicBoolean running = new AtomicBoolean(false);
+
     public Robot(GameState gameState) {
         this(gameState, Strategy.Random);
     }
@@ -44,6 +46,7 @@ public class Robot implements MoveDelegate {
         this.gameState = gameState;
     }
 
+    Timer timer;
     /**
      * TODO Start the delegation in a new thread.
      * The delegation should run in a separate thread.
@@ -69,24 +72,65 @@ public class Robot implements MoveDelegate {
      */
     @Override
     public void startDelegation(@NotNull MoveProcessor processor) {
+        System.out.println("Reached start -.-");
         stopDelegation();
+        running.set(true);
+        Thread thread = new Thread(){
+            @Override
+            public void run(){
+
+                synchronized (gameState){
+                    while(running.get()){
+                        try {
+                            System.out.println("Robot waits for some time");
+                            Thread.currentThread().sleep(timeIntervalGenerator.next());
+                        } catch (InterruptedException e)
+                        {
+                            Thread.currentThread().interrupt();
+                            System.out.println("Thread was interrupted, Failed to complete operation");
+                            e.printStackTrace();
+                        }
+                        if (strategy == Strategy.Random){
+                            makeMoveRandomly(processor);
+                        }
+                    }
+                }
+            }
+        };
+        thread.start();
+
         //ExecutorService executor =
-        new Thread( ()->{
+        //thread = new Thread( ()->{
             // Wait for some time (obtained from TimeIntervalGenerator.next()
+            /*
             try {
                 Thread.sleep(TimeIntervalGenerator.everySecond().next()); //????
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            // Make a move
-            if (strategy == Strategy.Random){
-                makeMoveRandomly(processor);
-            }
-            else if (strategy == Strategy.Smart){
-                makeMoveSmartly(processor);
-            }
-        });
 
+
+            // Make a move
+        timer = new Timer();
+            timer.scheduleAtFixedRate(new TimerTask() {
+                @Override
+                public void run() {
+                    System.out.println("start move? -.-");
+                    if (strategy == Strategy.Random){
+                        System.out.println("hi start -.-");
+                        makeMoveRandomly(processor);
+                        System.out.println("Reached finished -.-");
+                    }
+                    else if (strategy == Strategy.Smart){
+                        makeMoveSmartly(processor);
+                    }
+                }
+            }, timeIntervalGenerator.next(), timeIntervalGenerator.next());
+
+        //});
+
+        //thread.start();
+*/
     }
 
     /**
@@ -95,7 +139,14 @@ public class Robot implements MoveDelegate {
      */
     @Override
     public void stopDelegation() {
+        running.set(false);
         Thread.currentThread().interrupt();
+        /*
+        if (timer != null) {
+            timer.cancel();
+        }
+        timer = null;
+        */
     }
 
     private MoveResult tryMove(Direction direction) {
@@ -133,6 +184,7 @@ public class Robot implements MoveDelegate {
             }
         }
         if (aliveDirection != null) {
+            System.out.println("Offset: "+aliveDirection.getRowOffset()+", "+ aliveDirection.getColOffset());
             processor.move(aliveDirection);
         } else if (deadDirection != null) {
             processor.move(deadDirection);

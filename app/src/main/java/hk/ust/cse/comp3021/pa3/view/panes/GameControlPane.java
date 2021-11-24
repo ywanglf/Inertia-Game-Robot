@@ -3,6 +3,7 @@ package hk.ust.cse.comp3021.pa3.view.panes;
 import hk.ust.cse.comp3021.pa3.controller.GameController;
 import hk.ust.cse.comp3021.pa3.model.Direction;
 import hk.ust.cse.comp3021.pa3.model.GameState;
+import hk.ust.cse.comp3021.pa3.model.MoveResult;
 import hk.ust.cse.comp3021.pa3.model.Player;
 import hk.ust.cse.comp3021.pa3.util.MoveDelegate;
 import hk.ust.cse.comp3021.pa3.view.GameUIComponent;
@@ -104,8 +105,15 @@ public class GameControlPane extends GridPane implements GameUIComponent {
      * @param delegate The automated delegate to control the movement.
      */
     public void delegateControl(MoveDelegate delegate) {
-        delegate.startDelegation( processor -> {
+        moveDelegate = delegate;
+        moveDelegate.startDelegation( direction -> {
             //???
+            //gameController.getGameState().getGameBoardController().makeMove(direction);
+            //gameController.processMove(direction);
+            //move(direction);
+            MoveResult result = gameController.processMove(direction);
+            moveEvent.get().handle(new MoveEvent(result, player.getId()));
+            System.out.println("moved");
         });
         disable();
     }
@@ -117,6 +125,7 @@ public class GameControlPane extends GridPane implements GameUIComponent {
      * should be enabled to allow control from GUI, i.e., call {@link GameControlPane#enable()}.
      */
     public void revokeControl() {
+        moveDelegate.stopDelegation();
         enable();
     }
 

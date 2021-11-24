@@ -96,6 +96,8 @@ public class GameBoardController {
             // Move the player directly over
             assert alive.newPosition != null;
             gameBoard.getEntityCell(alive.newPosition).setEntity(gameBoard.getPlayer(playerID));
+            System.out.println("changed position");
+            System.out.println(gameBoard.getEntityCell(alive.newPosition).getEntity().toString());
         }
 
         return tryMoveResult;
