@@ -8,6 +8,7 @@ import hk.ust.cse.comp3021.pa3.model.MoveResult;
 import hk.ust.cse.comp3021.pa3.view.GameUIComponent;
 import hk.ust.cse.comp3021.pa3.view.UIServices;
 import hk.ust.cse.comp3021.pa3.view.events.MoveEvent;
+import javafx.application.Platform;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
@@ -139,7 +140,15 @@ public class MainGamePane extends VBox implements GameUIComponent {
             }
 
             // return to main menu
-            if (game != null) game.showMainMenu();
+            if (game != null) {
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        game.showMainMenu();
+                    }
+                });
+                //game.showMainMenu();
+            }
         }
     }
 

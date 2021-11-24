@@ -6,6 +6,7 @@ import hk.ust.cse.comp3021.pa3.model.Player;
 import hk.ust.cse.comp3021.pa3.util.Robot;
 import hk.ust.cse.comp3021.pa3.view.GameUIComponent;
 import hk.ust.cse.comp3021.pa3.view.events.MoveEvent;
+import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -91,10 +92,22 @@ public class PlayerPane extends VBox implements GameUIComponent {
     }
 
     private void gameMoveHandler(MoveEvent e) {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                statisticsPane.updateStatistics();
+                if (moveHandler != null) {
+                    moveHandler.handle(e);
+                }
+            }
+        });
+        /*
         statisticsPane.updateStatistics();
         if (moveHandler != null) {
             moveHandler.handle(e);
         }
+
+         */
     }
 
     public void setOnMove(EventHandler<MoveEvent> handler) {
@@ -123,8 +136,19 @@ public class PlayerPane extends VBox implements GameUIComponent {
      * Stop the delegation to the {@link Robot} instance if there is any.
      */
     public void stopRobot() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                robotButton.setSelected(false);
+                robotButton.setText("Robot Disabled");
+                controlPane.revokeControl();
+            }
+        });
+        /*
         this.robotButton.setSelected(false);
         this.robotButton.setText("Robot Disabled");
         this.controlPane.revokeControl();
+
+         */
     }
 }
