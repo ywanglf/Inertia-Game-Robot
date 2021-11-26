@@ -36,9 +36,8 @@ public class GameBoardController {
      *
      * @param playerId The id of the player to kick out.
      */
-    public void kickOut(int playerId) {
+    public synchronized void kickOut(int playerId) {
         Position original = gameBoard.getPlayer(playerId).getOwner().getPosition();
-        //MoveResult result = new MoveResult.Valid.KickedOut(original); ???
         gameBoard.getEntityCell(original).setEntity(null);
     }
 
@@ -73,7 +72,7 @@ public class GameBoardController {
      * @return An instance of {@link MoveResult} representing the result of this action.
      */
     @Nullable
-    public MoveResult makeMove(@NotNull final Direction direction, int playerID) {
+    public synchronized MoveResult makeMove(@NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(direction);
 
 
@@ -96,8 +95,8 @@ public class GameBoardController {
             // Move the player directly over
             assert alive.newPosition != null;
             gameBoard.getEntityCell(alive.newPosition).setEntity(gameBoard.getPlayer(playerID));
-            System.out.println("changed position");
-            System.out.println(gameBoard.getEntityCell(alive.newPosition).getEntity().toString());
+            //System.out.println("changed position");
+            //System.out.println(gameBoard.getEntityCell(alive.newPosition).getEntity().toString());
         }
 
         return tryMoveResult;
@@ -151,7 +150,7 @@ public class GameBoardController {
      * moving.
      */
     @NotNull
-    public MoveResult tryMove(@NotNull final Position position, @NotNull final Direction direction, int playerID) {
+    public synchronized MoveResult tryMove(@NotNull final Position position, @NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(position);
         Objects.requireNonNull(direction);
 
@@ -195,6 +194,53 @@ public class GameBoardController {
         }
 
         return new MoveResult.Valid.Alive(lastValidPosition, position, collectedGems, collectedExtraLives);
+    }
+
+    @NotNull
+    public synchronized int tryMoveSmartly(@NotNull final Position position, @NotNull final Direction direction, int playerID) {
+        Objects.requireNonNull(position);
+        Objects.requireNonNull(direction);
+
+        int decision = 1; // no movement
+
+        Position lastValidPosition = position;
+        do {
+            final Position newPosition = offsetPosition(lastValidPosition, direction);
+            if (newPosition == null) {
+                if (lastValidPosition.equals(position))
+                    decision = -1;
+                break;
+            }
+
+            // in multiplayer mode, we consider other players as a wall.
+            if (gameBoard.getCell(newPosition) instanceof EntityCell entityCell)
+                if (entityCell.getEntity() instanceof Player otherPlayer)
+                    if (otherPlayer.getId() != playerID) {
+                        decision = -1;
+                        break;
+                    }
+
+
+            lastValidPosition = newPosition;
+
+            if (gameBoard.getCell(newPosition) instanceof StopCell) {
+                break;
+            }
+
+            if (gameBoard.getCell(newPosition) instanceof EntityCell entityCell) {
+                if (entityCell.getEntity() instanceof Mine) {
+                    decision = 0;
+                    break;
+                }
+
+                if (entityCell.getEntity() instanceof Gem || entityCell.getEntity() instanceof ExtraLife) {
+                    decision = 2;
+                    break;
+                }
+            }
+        } while (true);
+
+        return decision;
     }
 
     /**

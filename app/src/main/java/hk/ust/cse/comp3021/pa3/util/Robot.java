@@ -23,7 +23,8 @@ public class Robot implements MoveDelegate {
      * A generator to get the time interval before the robot makes the next move.
      */
     public static Generator<Long> timeIntervalGenerator = TimeIntervalGenerator.everySecond();
-
+    //public static Generator<Long> timeIntervalGenerator = TimeIntervalGenerator.veryFast();
+    //public static Generator<Long> timeIntervalGenerator = TimeIntervalGenerator.expectedMilliseconds(100);
     /**
      * e.printStackTrace();
      * The game state of thee.printStackTrace(); player that the robot delegates.
@@ -35,10 +36,12 @@ public class Robot implements MoveDelegate {
      */
     private final Strategy strategy;
 
-    private final AtomicBoolean running = new AtomicBoolean(false);
+    private static final AtomicBoolean running = new AtomicBoolean(false);
+
+    private static final Object lock = new Object();
 
     public Robot(GameState gameState) {
-        this(gameState, Strategy.Random);
+        this(gameState, Strategy.Smart);
     }
 
     public Robot(GameState gameState, Strategy strategy) {
@@ -46,7 +49,7 @@ public class Robot implements MoveDelegate {
         this.gameState = gameState;
     }
 
-    Timer timer;
+    public Thread thread;
     /**
      * TODO Start the delegation in a new thread.
      * The delegation should run in a separate thread.
@@ -72,17 +75,50 @@ public class Robot implements MoveDelegate {
      */
     @Override
     public void startDelegation(@NotNull MoveProcessor processor) {
-        System.out.println("Reached start -.-");
+
+
+        System.out.println("--- Start Delegation ---");
         stopDelegation();
         running.set(true);
-        Thread thread = new Thread(){
+
+
+        thread = new Thread(() -> {
+            synchronized (this){
+                System.out.println("+++++ state of running: "+running.get());
+
+                while(running.get()){
+                    System.out.println("running: "+Thread.currentThread().getName());
+                    try {
+                        System.out.println("waiting...");
+                        Thread.currentThread().sleep(timeIntervalGenerator.next());
+                    } catch (InterruptedException e)
+                    {
+                        running.set(false);
+                        System.out.println(thread+(thread.isAlive()?" is Alive!!!!!":" is Dead"));
+                        System.out.println("Thread was interrupted, Failed to complete operation");
+                        return;
+                    }
+
+                    if (strategy == Strategy.Random){
+                        makeMoveRandomly(processor);
+                    }
+                    else if (strategy == Strategy.Smart){
+                        makeMoveSmartly(processor);
+                    }
+                }
+                return;
+            }
+
+        });
+        /*
+        Thread thread = new Thread((){
             @Override
             public void run(){
 
                 synchronized (gameState){
                     while(running.get()){
                         try {
-                            System.out.println("Robot waits for some time");
+                            System.out.println("waiting...");
                             Thread.currentThread().sleep(timeIntervalGenerator.next());
                         } catch (InterruptedException e)
                         {
@@ -97,6 +133,9 @@ public class Robot implements MoveDelegate {
                 }
             }
         };
+
+
+        thread.start();*/
         thread.start();
 
         //ExecutorService executor =
@@ -140,7 +179,8 @@ public class Robot implements MoveDelegate {
     @Override
     public void stopDelegation() {
         running.set(false);
-        Thread.currentThread().interrupt();
+        System.out.println("--- "+running.get()+" Stop Delegation ---");
+
         /*
         if (timer != null) {
             timer.cancel();
@@ -158,6 +198,15 @@ public class Robot implements MoveDelegate {
         return r;
     }
 
+    private int tryMoveSmartly(Direction direction) {
+        var player = gameState.getPlayer();
+        if (player.getOwner() == null) {
+            return -1;
+        }
+        var r = gameState.getGameBoardController().tryMoveSmartly(player.getOwner().getPosition(), direction, player.getId());
+        return r;
+    }
+
     /**
      * The robot moves randomly but rationally,
      * which means the robot will not move to a direction that will make the player die if there are other choices,
@@ -169,7 +218,7 @@ public class Robot implements MoveDelegate {
      *
      * @param processor The processor to make movements.
      */
-    private void makeMoveRandomly(MoveProcessor processor) {
+    private synchronized void makeMoveRandomly(MoveProcessor processor) {
         var directions = new ArrayList<>(Arrays.asList(Direction.values()));
         Collections.shuffle(directions);
         Direction aliveDirection = null;
@@ -177,6 +226,7 @@ public class Robot implements MoveDelegate {
         for (var direction :
                 directions) {
             var result = tryMove(direction);
+            System.out.println(">>>>> moving direction: "+direction.name()+" "+result);
             if (result instanceof MoveResult.Valid.Alive) {
                 aliveDirection = direction;
             } else if (result instanceof MoveResult.Valid.Dead) {
@@ -184,7 +234,7 @@ public class Robot implements MoveDelegate {
             }
         }
         if (aliveDirection != null) {
-            System.out.println("Offset: "+aliveDirection.getRowOffset()+", "+ aliveDirection.getColOffset());
+            //System.out.println("Offset: "+aliveDirection.getRowOffset()+", "+ aliveDirection.getColOffset());
             processor.move(aliveDirection);
         } else if (deadDirection != null) {
             processor.move(deadDirection);
@@ -204,7 +254,36 @@ public class Robot implements MoveDelegate {
      * @param processor The processor to make movements.
      */
     private void makeMoveSmartly(MoveProcessor processor) {
+        var directions = new ArrayList<>(Arrays.asList(Direction.values()));
+        Collections.shuffle(directions);
+        Direction aliveDirection = null;
+        Direction deadDirection = null;
+        int initResult = 1; // no movement
 
+        for (var direction :
+                directions) {
+
+            int result = tryMoveSmartly(direction);
+            System.out.println(">>>>> moving direction: "+direction.name()+result);
+            // if (result == 3) // gem or life
+            // if (result == 2) // nothing
+            // if (result == 1) // wall
+            // if (result == 0) // mine
+
+            // if result < previous one
+            if (result >= initResult) {
+                initResult = result;
+                aliveDirection = direction;
+            } else if (result == 0) {
+                deadDirection = direction;
+            }
+        }
+        if (aliveDirection != null) {
+            System.out.println("Offset: "+aliveDirection.getRowOffset()+", "+ aliveDirection.getColOffset());
+            processor.move(aliveDirection);
+        } else if (deadDirection != null) {
+            processor.move(deadDirection);
+        }
     }
 
 }
