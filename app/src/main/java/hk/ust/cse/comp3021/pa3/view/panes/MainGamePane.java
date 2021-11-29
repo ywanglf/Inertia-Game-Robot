@@ -107,18 +107,33 @@ public class MainGamePane extends VBox implements GameUIComponent {
      *
      * @param e The corresponding {@link MoveEvent}.
      */
-    private synchronized void gameMoveHandler(MoveEvent e) {
+    private void gameMoveHandler(MoveEvent e) {
+        System.out.println("6. = MainGamePane - gameMoveHandler: "+Thread.currentThread().getName());
         if (gameEnded) {
             return;
         }
 
         // update the gameBoardPane with the latest game states.
+/*
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                gameBoardPane.showGameState(gameController.getGameStates());
+                System.out.println("~~~~~~~~ changed game board ~~~~~~~~~");
+                System.out.println();
+            }
+        });
+
+ */
         this.gameBoardPane.showGameState(gameController.getGameStates());
+
 
         // show lose dialog if the move event indicates a player loses and get kicked out of the game board.
         if (e.getMoveResult() instanceof MoveResult.Valid.KickedOut) {
             getPlayerPane(e.getPlayerID()).kickOut();
             UIServices.showLoseDialog(gameController.getGameBoard().getPlayer(e.getPlayerID()));
+
+            System.out.println("----------------> losing thread: "+Thread.currentThread());
         }
 
         // try to get winners from the game controller
@@ -136,18 +151,22 @@ public class MainGamePane extends VBox implements GameUIComponent {
             // show win dialog for every winner.
             for (var winner :
                     winners) {
+                System.out.println("----------------> winning thread: "+Thread.currentThread().getName());
                 UIServices.showWinDialog(winner);
             }
 
             // return to main menu
             if (game != null) {
+                /*
                 Platform.runLater(new Runnable() {
                     @Override
                     public void run() {
                         game.showMainMenu();
                     }
                 });
-                //game.showMainMenu();
+
+                 */
+                game.showMainMenu();
             }
         }
     }

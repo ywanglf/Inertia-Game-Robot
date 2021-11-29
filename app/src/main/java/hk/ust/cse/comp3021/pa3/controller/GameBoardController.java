@@ -75,7 +75,7 @@ public class GameBoardController {
     public synchronized MoveResult makeMove(@NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(direction);
 
-
+        System.out.println("5. = GameBoardController - makeMove: "+Thread.currentThread().getName());
         var playerOwner = gameBoard.getPlayer(playerID).getOwner();
         if (playerOwner == null) {
             return null;
@@ -95,8 +95,7 @@ public class GameBoardController {
             // Move the player directly over
             assert alive.newPosition != null;
             gameBoard.getEntityCell(alive.newPosition).setEntity(gameBoard.getPlayer(playerID));
-            //System.out.println("changed position");
-            //System.out.println(gameBoard.getEntityCell(alive.newPosition).getEntity().toString());
+            System.out.println("moved");
         }
 
         return tryMoveResult;
@@ -216,7 +215,7 @@ public class GameBoardController {
             if (gameBoard.getCell(newPosition) instanceof EntityCell entityCell)
                 if (entityCell.getEntity() instanceof Player otherPlayer)
                     if (otherPlayer.getId() != playerID) {
-                        decision = -1;
+                        decision = -2;
                         break;
                     }
 

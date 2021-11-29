@@ -34,7 +34,7 @@ public class InertiaFxGame {
         primaryStage.setTitle("Inertia Game");
         primaryStage.setWidth(WINDOW_WIDTH);
         primaryStage.setHeight(WINDOW_HEIGHT);
-        primaryStage.resizableProperty().set(false);
+        primaryStage.resizableProperty().set(true);
         primaryStage.show();
         showMainMenu();
     }

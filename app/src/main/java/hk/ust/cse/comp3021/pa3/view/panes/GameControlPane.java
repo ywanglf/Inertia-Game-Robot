@@ -3,12 +3,10 @@ package hk.ust.cse.comp3021.pa3.view.panes;
 import hk.ust.cse.comp3021.pa3.controller.GameController;
 import hk.ust.cse.comp3021.pa3.model.Direction;
 import hk.ust.cse.comp3021.pa3.model.GameState;
-import hk.ust.cse.comp3021.pa3.model.MoveResult;
 import hk.ust.cse.comp3021.pa3.model.Player;
 import hk.ust.cse.comp3021.pa3.util.MoveDelegate;
 import hk.ust.cse.comp3021.pa3.view.GameUIComponent;
 import hk.ust.cse.comp3021.pa3.view.events.MoveEvent;
-import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.event.EventHandler;
@@ -78,7 +76,8 @@ public class GameControlPane extends GridPane implements GameUIComponent {
      *
      * @param direction The {@link Direction} to move.
      */
-    private void move(@NotNull Direction direction) {
+    private synchronized void move(@NotNull Direction direction) {
+        System.out.println("3. = GameControlPane - move: "+Thread.currentThread().getName());
         var result = this.gameController.processMove(direction, player.getId());
         if (result != null) {
             this.moveEvent.get().handle(new MoveEvent(result, player.getId()));
@@ -110,10 +109,9 @@ public class GameControlPane extends GridPane implements GameUIComponent {
             //???
             //gameController.getGameState().getGameBoardController().makeMove(direction);
             //gameController.processMove(direction);
-            //move(direction);
-            MoveResult result = gameController.processMove(direction);
-            moveEvent.get().handle(new MoveEvent(result, player.getId()));
-            System.out.println("moved");
+            move(direction);
+            //MoveResult result = gameController.processMove(direction,getGameState().getPlayer().getId());
+            //moveEvent.get().handle(new MoveEvent(result, player.getId()));
         });
         disable();
     }
@@ -125,7 +123,10 @@ public class GameControlPane extends GridPane implements GameUIComponent {
      * should be enabled to allow control from GUI, i.e., call {@link GameControlPane#enable()}.
      */
     public void revokeControl() {
-        moveDelegate.stopDelegation();
+        if (moveDelegate != null) {
+            moveDelegate.stopDelegation();
+            moveDelegate = null;
+        }
         enable();
     }
 

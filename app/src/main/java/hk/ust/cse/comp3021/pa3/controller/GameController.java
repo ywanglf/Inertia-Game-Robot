@@ -111,9 +111,9 @@ public class GameController {
      * @param playerID  ID of the player to move.
      * @return An instance of {@link MoveResult} indicating the result of the action.
      */
-    public MoveResult processMove(@NotNull final Direction direction, int playerID) {
+    public synchronized MoveResult processMove(@NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(direction);
-
+        System.out.println("4. = GameController - processMove: "+Thread.currentThread().getName());
         var result = this.getGameState(playerID).getGameBoardController().makeMove(direction, playerID);
         if (result == null) {
             return null;
@@ -188,8 +188,7 @@ public class GameController {
                 gameStates[i] = getGameState(players[i].getId());
                 if (gameStates[i].hasLost()) {
                     continue;
-                }
-                else {
+                } else {
                     if (gameStates[i].getScore() > maxScore) {
                         maxScore = gameStates[i].getScore();
                     }
@@ -204,9 +203,7 @@ public class GameController {
 
             Player[] winningPlayers = new Player[winners.size()];
             return winners.toArray(winningPlayers);
-        }
-        // the game has not finished yet: still gems left
-        else{
+        } else{        // the game has not finished yet: still gems left
             // check whether all players are dead
             boolean allDead = true;
 
@@ -214,8 +211,7 @@ public class GameController {
                 gameStates[i] = getGameState(players[i].getId());
                 if (gameStates[i].hasLost()) {
                     continue;
-                }
-                else {
+                } else {
                     allDead = false;
                     break;
                 }
@@ -223,9 +219,7 @@ public class GameController {
             if (allDead){
                 Player[] winningPlayers = new Player[winners.size()];
                 return winners.toArray(winningPlayers);
-            }
-            // the game still continues
-            else return null;
+            } else return null; // the game still continues
         }
     }
 }

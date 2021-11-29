@@ -1,7 +1,9 @@
 package hk.ust.cse.comp3021.pa3;
 
 import javafx.application.Application;
+import javafx.event.EventHandler;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -25,5 +27,14 @@ public class Main extends Application {
     public void start(@NotNull Stage primaryStage) {
         var game = new InertiaFxGame(primaryStage);
         game.run();
+
+        primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+            @Override
+            public void handle(WindowEvent event) {
+                System.exit(0);
+            }
+        });
+
+
     }
 }
