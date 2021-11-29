@@ -3,7 +3,6 @@ package hk.ust.cse.comp3021.pa3;
 import hk.ust.cse.comp3021.pa3.model.GameState;
 import hk.ust.cse.comp3021.pa3.view.panes.MainGamePane;
 import hk.ust.cse.comp3021.pa3.view.panes.MainMenuPane;
-import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.jetbrains.annotations.NotNull;
@@ -48,15 +47,6 @@ public class InertiaFxGame {
         mainMenu.initializeComponents();
         var scene = new Scene(mainMenu);
         scene.getStylesheets().add(styleSheet.toExternalForm());
-        /*
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                primaryStage.setScene(scene);
-            }
-        });
-
-         */
         primaryStage.setScene(scene);
     }
 
