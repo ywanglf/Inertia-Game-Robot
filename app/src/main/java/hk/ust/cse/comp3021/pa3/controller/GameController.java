@@ -199,9 +199,9 @@ public class GameController {
 
             Player[] winningPlayers = new Player[winners.size()];
             return winners.toArray(winningPlayers);
-        }
-        // the game has not finished yet: still gems left
-        else{
+
+            // the game has not finished yet: still gems left
+        } else{
             // check whether all players are dead
             boolean allDead = true;
 
@@ -215,9 +215,9 @@ public class GameController {
             if (allDead){
                 Player[] winningPlayers = new Player[0];
                 return winners.toArray(winningPlayers);
-            }
-            // the game still continues
-            else return null;
+
+                // the game still continues
+            } else return null;
         }
     }
 }

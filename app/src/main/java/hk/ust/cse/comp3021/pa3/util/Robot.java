@@ -85,14 +85,12 @@ public class Robot implements MoveDelegate {
                 while(running.get()){
                     try {
                         Thread.sleep(timeIntervalGenerator.next());
-                    } catch (InterruptedException e)
-                    {
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                     if (running.get() && strategy == Strategy.Random){
                         makeMoveRandomly(processor);
-                    }
-                    else if(running.get() && strategy == Strategy.Smart){
+                    } else if(running.get() && strategy == Strategy.Smart){
                         makeMoveSmartly(processor);
                     }
                 }
