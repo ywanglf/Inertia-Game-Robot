@@ -37,7 +37,7 @@ public class GameBoardController {
      * @param playerId The id of the player to kick out.
      */
     public synchronized void kickOut(int playerId) {
-        Position original = gameBoard.getPlayer(playerId).getOwner().getPosition();
+        Position original = Objects.requireNonNull(gameBoard.getPlayer(playerId).getOwner()).getPosition();
         gameBoard.getEntityCell(original).setEntity(null);
     }
 
@@ -75,7 +75,6 @@ public class GameBoardController {
     public synchronized MoveResult makeMove(@NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(direction);
 
-        System.out.println("5. = GameBoardController - makeMove: "+Thread.currentThread().getName());
         var playerOwner = gameBoard.getPlayer(playerID).getOwner();
         if (playerOwner == null) {
             return null;
@@ -95,7 +94,6 @@ public class GameBoardController {
             // Move the player directly over
             assert alive.newPosition != null;
             gameBoard.getEntityCell(alive.newPosition).setEntity(gameBoard.getPlayer(playerID));
-            System.out.println("moved");
         }
 
         return tryMoveResult;
@@ -195,7 +193,6 @@ public class GameBoardController {
         return new MoveResult.Valid.Alive(lastValidPosition, position, collectedGems, collectedExtraLives);
     }
 
-    @NotNull
     public synchronized int tryMoveSmartly(@NotNull final Position position, @NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(position);
         Objects.requireNonNull(direction);
