@@ -113,7 +113,7 @@ public class GameController {
      */
     public synchronized MoveResult processMove(@NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(direction);
-        System.out.println("4. = GameController - processMove: "+Thread.currentThread().getName());
+
         var result = this.getGameState(playerID).getGameBoardController().makeMove(direction, playerID);
         if (result == null) {
             return null;
@@ -186,12 +186,8 @@ public class GameController {
 
             for (int i=0; i< players.length; i++){
                 gameStates[i] = getGameState(players[i].getId());
-                if (gameStates[i].hasLost()) {
-                    continue;
-                } else {
-                    if (gameStates[i].getScore() > maxScore) {
-                        maxScore = gameStates[i].getScore();
-                    }
+                if (! gameStates[i].hasLost() && gameStates[i].getScore() > maxScore) {
+                    maxScore = gameStates[i].getScore();
                 }
             }
 
@@ -209,15 +205,13 @@ public class GameController {
 
             for (int i=0; i< players.length; i++){
                 gameStates[i] = getGameState(players[i].getId());
-                if (gameStates[i].hasLost()) {
-                    continue;
-                } else {
+                if (! gameStates[i].hasLost()) {
                     allDead = false;
                     break;
                 }
             }
             if (allDead){
-                Player[] winningPlayers = new Player[winners.size()];
+                Player[] winningPlayers = new Player[0];
                 return winners.toArray(winningPlayers);
             } else return null; // the game still continues
         }
