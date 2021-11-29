@@ -38,14 +38,9 @@ public class Robot implements MoveDelegate {
     private final AtomicBoolean running = new AtomicBoolean(false);
 
     public Robot(GameState gameState) {
-        //this(gameState, Strategy.Smart);
-        this(gameState, num);
-        if (num == Strategy.Random)
-            num = Strategy.Smart;
-        else num = Strategy.Random;
+        this(gameState, Strategy.Random);
     }
 
-    public static Strategy num = Strategy.Random;
     public Robot(GameState gameState, Strategy strategy) {
         this.strategy = strategy;
         this.gameState = gameState;

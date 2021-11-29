@@ -63,12 +63,6 @@ public class PlayerPane extends VBox implements GameUIComponent {
         robotButton.setOnAction(this::robotButtonAction);
         statisticsPane.initializeComponents();
         statisticsPane.updateStatistics();
-        /*
-        controlPane.delegateControl(new Robot(getGameState()));
-        robotButton.setSelected(true);
-        robotButton.setText("Robot Enabled");
-
-         */
     }
 
     /**
