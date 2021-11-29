@@ -3,6 +3,7 @@ package hk.ust.cse.comp3021.pa3.view.panes;
 import hk.ust.cse.comp3021.pa3.model.GameState;
 import hk.ust.cse.comp3021.pa3.view.GameUIComponent;
 import hk.ust.cse.comp3021.pa3.view.controls.GameCell;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.layout.GridPane;
 
@@ -29,19 +30,18 @@ public class GameBoardPane extends GridPane implements GameUIComponent {
         if (gameStates.length < 1) {
             throw new IllegalArgumentException();
         }
-
-        System.out.println("....Updating game board");
-        this.getChildren().clear();
-        // since all gameStates of all players refer to the same gameBoard,
-        // we can simply use the first one.
-        var gameBoard = gameStates[0].getGameBoard();
-        for (int x = 0; x < gameBoard.getNumRows(); x++) {
-            for (int y = 0; y < gameBoard.getNumCols(); y++) {
-                var cellControl = new GameCell(gameBoard.getCell(x, y));
-                this.add(cellControl, y, x);
+        Platform.runLater(() -> {
+            getChildren().clear();
+            // since all gameStates of all players refer to the same gameBoard,
+            // we can simply use the first one.
+            var gameBoard = gameStates[0].getGameBoard();
+            for (int x = 0; x < gameBoard.getNumRows(); x++) {
+                for (int y = 0; y < gameBoard.getNumCols(); y++) {
+                    var cellControl = new GameCell(gameBoard.getCell(x, y));
+                    add(cellControl, y, x);
+                }
             }
-        }
-
+        });
     }
 
 }

@@ -22,9 +22,8 @@ public class Robot implements MoveDelegate {
     /**
      * A generator to get the time interval before the robot makes the next move.
      */
-    //public static Generator<Long> timeIntervalGenerator = TimeIntervalGenerator.everySecond();
-    public static Generator<Long> timeIntervalGenerator = TimeIntervalGenerator.veryFast();
-    //public static Generator<Long> timeIntervalGenerator = TimeIntervalGenerator.expectedMilliseconds(50);
+    public static Generator<Long> timeIntervalGenerator = TimeIntervalGenerator.everySecond();
+
     /**
      * e.printStackTrace();
      * The game state of thee.printStackTrace(); player that the robot delegates.
@@ -36,18 +35,23 @@ public class Robot implements MoveDelegate {
      */
     private final Strategy strategy;
 
-    private static final AtomicBoolean running = new AtomicBoolean(false);
+    private final AtomicBoolean running = new AtomicBoolean(false);
 
     public Robot(GameState gameState) {
-        this(gameState, Strategy.Smart);
+        //this(gameState, Strategy.Smart);
+        this(gameState, num);
+        if (num == Strategy.Random)
+            num = Strategy.Smart;
+        else num = Strategy.Random;
     }
 
+    public static Strategy num = Strategy.Random;
     public Robot(GameState gameState, Strategy strategy) {
         this.strategy = strategy;
         this.gameState = gameState;
     }
 
-    public Thread thread;
+    Thread thread;
     /**
      * TODO Start the delegation in a new thread.
      * The delegation should run in a separate thread.
@@ -73,44 +77,28 @@ public class Robot implements MoveDelegate {
      */
     @Override
     public void startDelegation(@NotNull MoveProcessor processor) {
-
         stopDelegation();
-        System.out.println("Start Delegation - Initial no. of threads: "+Thread.activeCount());
         running.set(true);
+        thread = new Thread( ()->{
 
-
-        thread = new Thread(() -> {
-            synchronized (thread){
-
+            synchronized (gameState){
                 while(running.get()){
-                    System.out.println("----> running: "+Thread.currentThread().getName()+ "; num: "+Thread.activeCount());
                     try {
-                        System.out.println("waiting...");
-                        thread.wait(timeIntervalGenerator.next());
-                        //Thread.currentThread().sleep(timeIntervalGenerator.next());
+                        Thread.sleep(timeIntervalGenerator.next());
                     } catch (InterruptedException e)
                     {
-                        running.set(false);
-                        System.out.println(thread+(thread.isAlive()?" is Alive!!!!!":" is Dead"));
-                        System.out.println("Thread was interrupted, Failed to complete operation");
-                        return;
+                        e.printStackTrace();
                     }
                     if (running.get() && strategy == Strategy.Random){
                         makeMoveRandomly(processor);
-                        System.out.println("|| Player "+ gameState.getPlayer().getId()+" Gem: "+gameState.getNumGotGems());
-                        System.out.println("|| Player "+ gameState.getPlayer().getId()+" Life: "+(gameState.getNumLives()-1));
                     }
-                    else if (running.get() && strategy == Strategy.Smart){
+                    else if(running.get() && strategy == Strategy.Smart){
                         makeMoveSmartly(processor);
-                        System.out.println("|| Player "+ gameState.getPlayer().getId()+" Gem: "+gameState.getNumGotGems());
-                        System.out.println("|| Player "+ gameState.getPlayer().getId()+" Life: "+(gameState.getNumLives()-1));
                     }
                 }
-                return;
             }
 
         });
-
         thread.start();
     }
 
@@ -120,28 +108,16 @@ public class Robot implements MoveDelegate {
      */
     @Override
     public void stopDelegation() {
-
         running.set(false);
 
-
-        if (thread != null && thread.isAlive()) {
+        if (thread != null && thread.isAlive()){
             try {
                 thread.join();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println(">>>> waiting exit");
-        }
-        if (thread != null && !thread.isAlive()) {
-            System.out.println(">>>>> thread exited");
         }
 
-
-
-
-
-        System.out.println("--- "+running.get()+" Stop Delegation ---");
-        System.out.println("Final num of threads: "+Thread.activeCount());
     }
 
     private MoveResult tryMove(Direction direction) {
@@ -158,8 +134,7 @@ public class Robot implements MoveDelegate {
         if (player.getOwner() == null) {
             return -1;
         }
-        var r = gameState.getGameBoardController().tryMoveSmartly(player.getOwner().getPosition(), direction, player.getId());
-        return r;
+        return gameState.getGameBoardController().tryMoveSmartly(player.getOwner().getPosition(), direction, player.getId());
     }
 
     /**
@@ -173,8 +148,7 @@ public class Robot implements MoveDelegate {
      *
      * @param processor The processor to make movements.
      */
-    private synchronized void makeMoveRandomly(MoveProcessor processor) {
-        System.out.println("= Robot - makeMoveRandomly: "+Thread.currentThread().getName());
+    private void makeMoveRandomly(MoveProcessor processor) {
         var directions = new ArrayList<>(Arrays.asList(Direction.values()));
         Collections.shuffle(directions);
         Direction aliveDirection = null;
@@ -189,7 +163,6 @@ public class Robot implements MoveDelegate {
             }
         }
         if (aliveDirection != null) {
-            //System.out.println("Offset: "+aliveDirection.getRowOffset()+", "+ aliveDirection.getColOffset());
             processor.move(aliveDirection);
         } else if (deadDirection != null) {
             processor.move(deadDirection);
@@ -209,8 +182,6 @@ public class Robot implements MoveDelegate {
      * @param processor The processor to make movements.
      */
     private void makeMoveSmartly(MoveProcessor processor) {
-
-        System.out.println("1. Make Move Smartly: "+Thread.currentThread().getName());
         var directions = new ArrayList<>(Arrays.asList(Direction.values()));
         Collections.shuffle(directions);
         Direction aliveDirection = null;
@@ -222,7 +193,6 @@ public class Robot implements MoveDelegate {
                 directions) {
 
             int result = tryMoveSmartly(direction);
-            System.out.println("2. >>>>> moving direction: "+direction.name()+result);
 
             // if (result == 2) // gem or life
             // if (result == 1) // nth
@@ -241,7 +211,6 @@ public class Robot implements MoveDelegate {
             }
         }
         if (aliveDirection != null) {
-            //System.out.println("Offset: "+aliveDirection.getRowOffset()+", "+ aliveDirection.getColOffset());
             processor.move(aliveDirection);
         } else if (deadDirection != null) {
             if (! hasPlayer)

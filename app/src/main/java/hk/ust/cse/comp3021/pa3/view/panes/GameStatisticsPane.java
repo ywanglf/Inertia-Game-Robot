@@ -60,34 +60,17 @@ public class GameStatisticsPane extends GridPane implements GameUIComponent {
      * Updates the statistics display with latest {@link GameState}.
      */
     public void updateStatistics() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                setNumMoves(gameState.getNumMoves());
-                setNumUndoes(gameState.getMoveStack().getPopCount());
-                setNumDeaths(gameState.getNumDeaths());
-                setNumLives(gameState.getNumLives(), gameState.hasUnlimitedLives());
-                setScore(gameState.getScore());
-            }
+        Platform.runLater(() -> {
+            setNumMoves(gameState.getNumMoves());
+            setNumUndoes(gameState.getMoveStack().getPopCount());
+            setNumDeaths(gameState.getNumDeaths());
+            setNumLives(gameState.getNumLives(), gameState.hasUnlimitedLives());
+            setScore(gameState.getScore());
         });
-        /*
-        setNumMoves(gameState.getNumMoves());
-        setNumUndoes(gameState.getMoveStack().getPopCount());
-        setNumDeaths(gameState.getNumDeaths());
-        setNumLives(gameState.getNumLives(), gameState.hasUnlimitedLives());
-        setScore(gameState.getScore());
-
-         */
     }
 
     private void setNumMoves(int value) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                numMovesLabel.setText(String.format("Move: %d", value));
-            }
-        });
-        //this.numMovesLabel.setText(String.format("Move: %d", value));
+        this.numMovesLabel.setText(String.format("Move: %d", value));
     }
 
     private void setNumUndoes(int value) {

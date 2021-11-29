@@ -111,7 +111,7 @@ public class GameController {
      * @param playerID  ID of the player to move.
      * @return An instance of {@link MoveResult} indicating the result of the action.
      */
-    public synchronized MoveResult processMove(@NotNull final Direction direction, int playerID) {
+    public MoveResult processMove(@NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(direction);
 
         var result = this.getGameState(playerID).getGameBoardController().makeMove(direction, playerID);
@@ -187,7 +187,7 @@ public class GameController {
             for (int i=0; i< players.length; i++){
                 gameStates[i] = getGameState(players[i].getId());
                 if (! gameStates[i].hasLost() && gameStates[i].getScore() > maxScore) {
-                    maxScore = gameStates[i].getScore();
+                        maxScore = gameStates[i].getScore();
                 }
             }
 
@@ -199,13 +199,15 @@ public class GameController {
 
             Player[] winningPlayers = new Player[winners.size()];
             return winners.toArray(winningPlayers);
-        } else{        // the game has not finished yet: still gems left
+        }
+        // the game has not finished yet: still gems left
+        else{
             // check whether all players are dead
             boolean allDead = true;
 
             for (int i=0; i< players.length; i++){
                 gameStates[i] = getGameState(players[i].getId());
-                if (! gameStates[i].hasLost()) {
+                if (!gameStates[i].hasLost()) {
                     allDead = false;
                     break;
                 }
@@ -213,7 +215,9 @@ public class GameController {
             if (allDead){
                 Player[] winningPlayers = new Player[0];
                 return winners.toArray(winningPlayers);
-            } else return null; // the game still continues
+            }
+            // the game still continues
+            else return null;
         }
     }
 }

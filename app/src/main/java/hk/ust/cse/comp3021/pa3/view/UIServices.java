@@ -4,7 +4,6 @@ import hk.ust.cse.comp3021.pa3.InertiaFxGame;
 import hk.ust.cse.comp3021.pa3.model.GameState;
 import hk.ust.cse.comp3021.pa3.model.Player;
 import hk.ust.cse.comp3021.pa3.util.GameStateSerializer;
-import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.stage.FileChooser;
 import org.jetbrains.annotations.NotNull;

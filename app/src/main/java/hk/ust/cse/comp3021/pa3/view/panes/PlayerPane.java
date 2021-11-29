@@ -63,16 +63,12 @@ public class PlayerPane extends VBox implements GameUIComponent {
         robotButton.setOnAction(this::robotButtonAction);
         statisticsPane.initializeComponents();
         statisticsPane.updateStatistics();
-        System.out.println(">>> active threads: "+Thread.activeCount());
-/*
-        // delete -> to make robot start together
+        /*
         controlPane.delegateControl(new Robot(getGameState()));
         robotButton.setSelected(true);
         robotButton.setText("Robot Enabled");
-*/
 
-
-
+         */
     }
 
     /**
@@ -103,19 +99,10 @@ public class PlayerPane extends VBox implements GameUIComponent {
 
     private void gameMoveHandler(MoveEvent e) {
         statisticsPane.updateStatistics();
-        Platform.runLater(()-> {
-                if (moveHandler != null) {
-                    moveHandler.handle(e);
-                }
-
-        });/*
-
-        statisticsPane.updateStatistics();
         if (moveHandler != null) {
-            moveHandler.handle(e);
-        }
-*/
+            Platform.runLater(()-> moveHandler.handle(e));
 
+        }
     }
 
     public void setOnMove(EventHandler<MoveEvent> handler) {

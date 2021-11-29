@@ -7,6 +7,7 @@ import hk.ust.cse.comp3021.pa3.model.Player;
 import hk.ust.cse.comp3021.pa3.util.MoveDelegate;
 import hk.ust.cse.comp3021.pa3.view.GameUIComponent;
 import hk.ust.cse.comp3021.pa3.view.events.MoveEvent;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.event.EventHandler;
@@ -76,7 +77,7 @@ public class GameControlPane extends GridPane implements GameUIComponent {
      *
      * @param direction The {@link Direction} to move.
      */
-    private synchronized void move(@NotNull Direction direction) {
+    private void move(@NotNull Direction direction) {
         var result = this.gameController.processMove(direction, player.getId());
         if (result != null) {
             this.moveEvent.get().handle(new MoveEvent(result, player.getId()));
@@ -115,10 +116,7 @@ public class GameControlPane extends GridPane implements GameUIComponent {
      * should be enabled to allow control from GUI, i.e., call {@link GameControlPane#enable()}.
      */
     public void revokeControl() {
-        if (moveDelegate != null) {
-            moveDelegate.stopDelegation();
-            moveDelegate = null;
-        }
+        moveDelegate.stopDelegation();
         enable();
     }
 
