@@ -77,7 +77,6 @@ public class GameControlPane extends GridPane implements GameUIComponent {
      * @param direction The {@link Direction} to move.
      */
     private synchronized void move(@NotNull Direction direction) {
-        System.out.println("3. = GameControlPane - move: "+Thread.currentThread().getName());
         var result = this.gameController.processMove(direction, player.getId());
         if (result != null) {
             this.moveEvent.get().handle(new MoveEvent(result, player.getId()));
@@ -105,14 +104,7 @@ public class GameControlPane extends GridPane implements GameUIComponent {
      */
     public void delegateControl(MoveDelegate delegate) {
         moveDelegate = delegate;
-        moveDelegate.startDelegation( direction -> {
-            //???
-            //gameController.getGameState().getGameBoardController().makeMove(direction);
-            //gameController.processMove(direction);
-            move(direction);
-            //MoveResult result = gameController.processMove(direction,getGameState().getPlayer().getId());
-            //moveEvent.get().handle(new MoveEvent(result, player.getId()));
-        });
+        moveDelegate.startDelegation(this::move);
         disable();
     }
 
