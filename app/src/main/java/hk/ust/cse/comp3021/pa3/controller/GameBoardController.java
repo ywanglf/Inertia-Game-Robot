@@ -72,7 +72,7 @@ public class GameBoardController {
      * @return An instance of {@link MoveResult} representing the result of this action.
      */
     @Nullable
-    public MoveResult makeMove(@NotNull final Direction direction, int playerID) {
+    public synchronized MoveResult makeMove(@NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(direction);
 
 
@@ -148,7 +148,7 @@ public class GameBoardController {
      * moving.
      */
     @NotNull
-    public MoveResult tryMove(@NotNull final Position position, @NotNull final Direction direction, int playerID) {
+    public synchronized MoveResult tryMove(@NotNull final Position position, @NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(position);
         Objects.requireNonNull(direction);
 
