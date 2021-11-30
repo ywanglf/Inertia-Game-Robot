@@ -111,7 +111,7 @@ public class GameController {
      * @param playerID  ID of the player to move.
      * @return An instance of {@link MoveResult} indicating the result of the action.
      */
-    public MoveResult processMove(@NotNull final Direction direction, int playerID) {
+    public synchronized MoveResult processMove(@NotNull final Direction direction, int playerID) {
         Objects.requireNonNull(direction);
 
         var result = this.getGameState(playerID).getGameBoardController().makeMove(direction, playerID);
